@@ -5,6 +5,8 @@ import (
 	"io"
 )
 
+var ErrInvalidWhence = errors.New("bytes.Reader.Seek: invalid whence")
+
 // ZeroReader reads only zeros into the provided buffer, until `Amount` is reached.
 type ZeroReader struct {
 	Amount       int64
@@ -38,11 +40,11 @@ func (zr *ZeroReader) Seek(offset int64, whence int) (int64, error) {
 	case io.SeekStart:
 		zr.NumBytesRead = offset
 	case io.SeekCurrent:
-		zr.NumBytesRead = zr.NumBytesRead + offset
+		zr.NumBytesRead += offset
 	case io.SeekEnd:
 		zr.NumBytesRead = max(zr.Amount-offset, 0)
 	default:
-		return 0, errors.New("bytes.Reader.Seek: invalid whence")
+		return 0, ErrInvalidWhence
 	}
 	return zr.NumBytesRead, nil
 }
